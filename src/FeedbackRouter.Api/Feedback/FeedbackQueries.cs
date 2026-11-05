@@ -8,7 +8,8 @@ namespace FeedbackRouter.Api.Feedback;
 
 public sealed class FeedbackQueries(FeedbackDbContext db, IOptions<AzureDevOpsOptions> ado)
 {
-    public const int UntitledLength = 90;
+    // Long enough that the hover text shows the whole first line; the table truncates visually.
+    public const int UntitledLength = 300;
 
     public async Task<IReadOnlyList<QueueItemDto>> QueueAsync(
         FeedbackStatus? status, Area? area, CancellationToken ct)
