@@ -23,7 +23,7 @@ flowchart LR
 ```
 
 1. Feedback arrives as **New**.
-2. The triage worker embeds the text and compares it with earlier items (cosine similarity, threshold 0.80, top 3). It asks the model for strict JSON, validates it and retries once. A valid answer makes the item **Proposed**; a second invalid answer leaves it New with the error shown. Prompt: `src/FeedbackRouter.Core/Prompts/triage.v1.md`.
+2. The triage worker embeds the text and compares it with earlier items (cosine similarity, threshold 0.80, top 3). It asks the model for strict JSON, validates it and retries once. A global daily cap on model calls (`Triage__DailyLlmCallCap`, default 50) bounds the cost; past it, new items stay New until the next UTC day. A valid answer makes the item **Proposed**; a second invalid answer leaves it New with the error shown. Prompt: `src/FeedbackRouter.Core/Prompts/triage.v1.md`.
 3. A reviewer can click **Start review** to claim an item (**In review**). The claim ends on release, on a decision, or after 30 minutes idle. The item then goes back to Proposed or New.
 4. **Approve and file** creates the work item in Azure DevOps (REST 7.1, JSON Patch). The item becomes **Filed** only when Azure DevOps confirms. If filing fails, the item stays **Approved**, the error shows in the pane, and approving again retries. Two approves at the same time file once.
 5. **Merge** points the item at the original; **Dismiss** closes it.
@@ -78,6 +78,7 @@ Set these as environment variables (double underscore for nesting) or in a `.env
 | `Demo__Enabled` | `false` | Public demo: seeds an empty database, resets it nightly, shows a banner, never files |
 | `Auth__RequireSignIn` | `true` (`false` in Development) | Require a signed-in reviewer, see below |
 | `Reviewer__Name` | `reviewer` | Name recorded on decisions when sign-in is off |
+| `Triage__DailyLlmCallCap` | `50` | Chat and embedding calls per UTC day across the app; one item takes 2 or 3 |
 | `RateLimit__SubmitPerMinute` | `10` | Submissions per IP per minute |
 | `APPLICATIONINSIGHTS_CONNECTION_STRING` | empty | Send OpenTelemetry to Azure Monitor; otherwise traces go to the console |
 
@@ -99,7 +100,7 @@ Set these as environment variables (double underscore for nesting) or in a `.env
 
 | Method | Path | |
 | --- | --- | --- |
-| POST | `/api/feedback` | Submit `{ text, email? }`, rate limited, public |
+| POST | `/api/feedback` | Submit `{ text, email? }`, 10 to 4,000 characters, rate limited, public |
 | GET | `/api/queue?status=&area=` | Items, most severe first |
 | GET | `/api/feedback/{id}` | Detail with proposal, duplicates, decision and work item |
 | POST / DELETE | `/api/feedback/{id}/review` | Start or release a review |
@@ -117,10 +118,16 @@ src/FeedbackRouter.Infra   EF Core, Azure DevOps client, LLM adapters
 src/FeedbackRouter.Api     minimal API endpoints, decision and review services, background workers
 src/FeedbackRouter.Web     React 19 + Vite frontend
 tests/FeedbackRouter.Tests xUnit tests
-seed/feedback.json         40 sample items
+seed/feedback.json         40 sample items, each with a stored proposal
 ```
 
+## Seed data
+
+`seed/feedback.json` holds 40 realistic items, including clusters of near-duplicates, questions, licensing issues and messages that are not feedback. Each item carries a proposal that follows the `triage.v1` JSON contract and passes the same validation as a live reply. These proposals were written offline by Claude (`claude-opus-5-5`), not by the app's own pipeline, and every one is labeled with that model name. They have no duplicate candidates, because similarity scores need the embedding model.
+
 ## Next steps
+
+- Regenerate the seed proposals with the configured Azure OpenAI deployment, including embeddings and duplicate candidates.
 
 - Turn triage on with an Azure OpenAI deployment and check proposal quality against the seed set.
 - Before retrying a failed filing, query Azure DevOps for the `feedback:{id}` tag, so a lost response cannot create a second work item.
