@@ -1,0 +1,202 @@
+[
+  {
+    "text": "After updating to 18.1.2 none of my breakpoints get hit in an ASP.NET Core project (net9.0). Hollow circle, tooltip says \"The breakpoint will not currently be hit. No symbols have been loaded for this document.\" Clean, rebuild, deleted bin/obj, nothing. Was fine on 18.0.3. Rolling back now because I literally cannot debug.",
+    "email": "m.ostrowski@fabrikam.com",
+    "ageHours": 702
+  },
+  {
+    "text": "Solution build went from ~40s to 3+ minutes after we enabled Central Package Management (Directory.Packages.props). 62 projects. Binlog shows most of the time in ResolvePackageAssets. Nothing else changed in the commit.",
+    "email": "build-team@contoso.com",
+    "ageHours": 690
+  },
+  {
+    "text": "VS keeps telling me \"Your license has gone stale and must be updated\" every morning. I have an active Enterprise subscription through work. Signing out and back in fixes it for about a day. Version 17.14.9. We're behind a corporate proxy if that matters.",
+    "email": "j.whitfield@contoso.com",
+    "ageHours": 668
+  },
+  {
+    "text": "Is there a supported way to share one .editorconfig across ~30 repos without copying the file into each one? We tried a git submodule but VS doesn't pick it up from outside the solution folder.",
+    "email": null,
+    "ageHours": 650
+  },
+  {
+    "text": "Switching branches in Git Changes freezes the whole IDE for 30-60 seconds on our monorepo (~180k files). git checkout from the terminal takes 2 seconds. VS 18.0.1. Happens every single time.",
+    "email": "arjun.mehta@fabrikam.com",
+    "ageHours": 640
+  },
+  {
+    "text": "Razor IntelliSense is gone in .razor files. No completions for components or @code members, it behaves like plain text. .cs files are fine. Blazor Web App template, net9.0, VS 2026 18.1.",
+    "email": "lena.brandt@example.com",
+    "ageHours": 612
+  },
+  {
+    "text": "Extension Manager just spins on \"Loading...\" forever. Can't install or update anything. Tried devenv /resetuserdata, same thing. Proxy is configured and works fine for NuGet.",
+    "email": null,
+    "ageHours": 590
+  },
+  {
+    "text": "The installer downloaded 11.4 GB when I only selected the .NET desktop development workload. Is it pulling every optional component? On a metered connection this is a real problem.",
+    "email": "t.nakamura@example.com",
+    "ageHours": 575
+  },
+  {
+    "text": "The ASP.NET Core environments docs page still shows applicationUrl under iisSettings in the launchSettings.json example. That isn't valid, I copied it and got a schema warning. It belongs under the profile.",
+    "email": null,
+    "ageHours": 560
+  },
+  {
+    "text": "breakpoints not hitting since last update. 'no symbols have been loaded for this document'. web api project. worked last week. 18.1.2",
+    "email": null,
+    "ageHours": 540
+  },
+  {
+    "text": "Let me pin a watch expression so it survives restarting the debugger. Every time I restart a session I retype the same six watches.",
+    "email": "r.costa@example.com",
+    "ageHours": 520
+  },
+  {
+    "text": "Admin here. Trying to assign a Visual Studio Professional subscription to a new hire in the admin portal (manage.visualstudio.com) and it fails with \"Something went wrong. Please try again later.\" Three days now. Other assignments from the same agreement work.",
+    "email": "it-licensing@fabrikam.com",
+    "ageHours": 505
+  },
+  {
+    "text": "Build fails randomly with:\n\nerror MSB4018: The \"GenerateDepsFile\" task failed unexpectedly.\nSystem.IO.IOException: The process cannot access the file 'C:\\src\\api\\obj\\Debug\\net9.0\\Api.deps.json' because it is being used by another process.\n   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)\n   at Microsoft.NET.Build.Tasks.GenerateDepsFile.WriteDepsFile(String depsFilePath)\n\nMaybe 1 in 5 builds. Rebuild works. Possibly only on machines with Defender real-time scanning, not sure.",
+    "email": "ci-owner@contoso.com",
+    "ageHours": 490
+  },
+  {
+    "text": "VS hangs when I change branch. Not responding for like a minute. big repo. please fix this, it's killing my day",
+    "email": null,
+    "ageHours": 470
+  },
+  {
+    "text": "How do I make Test Explorer run test assemblies in parallel? I have 14 test projects and it runs them one after another. Is there a setting, or is it .runsettings only?",
+    "email": "s.ivanova@example.com",
+    "ageHours": 455
+  },
+  {
+    "text": "Format Document (Ctrl+K, Ctrl+D) ignores csharp_new_line_before_open_brace = none from my .editorconfig in 18.1. dotnet format respects it on the same file, so the config is fine.",
+    "email": null,
+    "ageHours": 440
+  },
+  {
+    "text": "license stale again. \"must be updated\". signed in with the same account like always. 4th time this week. I pay for this.",
+    "email": null,
+    "ageHours": 420
+  },
+  {
+    "text": "Hot Reload says \"Edits were made which cannot be compiled\" for any change inside a lambda, even changing a string literal. 18.0.3, net9.0 minimal API.",
+    "email": "p.okafor@fabrikam.com",
+    "ageHours": 400
+  },
+  {
+    "text": "devenv sits at 5.8 GB with one solution open and nothing running. It grows over the day until everything gets sluggish and I have to restart. No idea which component, Task Manager just shows devenv.exe.",
+    "email": null,
+    "ageHours": 385
+  },
+  {
+    "text": "Please let me disable an extension for one solution only. I have a Unity extension that slows down every non-Unity project and toggling it globally means restarting VS twice a day.",
+    "email": "game-dev@example.com",
+    "ageHours": 370
+  },
+  {
+    "text": "no intellisense in razor files after updating. components don't autocomplete at all. restarting doesn't help, deleting the .vs folder doesn't help",
+    "email": null,
+    "ageHours": 360
+  },
+  {
+    "text": "Is it possible to sign commits with an SSH key from the Git Changes window, or do I have to drop to the command line for that?",
+    "email": "k.lindqvist@example.com",
+    "ageHours": 340
+  },
+  {
+    "text": "The \"Debug a .NET app in a container\" tutorial says to pick \"Docker Compose\" from the launch dropdown, but in 18.x that option is called something else and the screenshots are from the old UI. Beginners on my team got stuck on step 3.",
+    "email": null,
+    "ageHours": 322
+  },
+  {
+    "text": "Since 18.1.2 every breakpoint in my Razor Pages handlers (OnPostAsync etc.) shows as a hollow circle and is skipped. Unchecking Just My Code changes nothing. A colleague on 18.0 debugs the same repo fine.",
+    "email": "d.morales@contoso.com",
+    "ageHours": 300
+  },
+  {
+    "text": "I'm changing jobs. Can I move my personal Visual Studio Professional annual subscription to a different Microsoft account, or do I have to cancel and buy it again?",
+    "email": "freelance.ana@example.com",
+    "ageHours": 285
+  },
+  {
+    "text": "Show which project is building right now in the status bar, with elapsed time. With 60 projects I can't tell whether the build is stuck or just slow.",
+    "email": null,
+    "ageHours": 270
+  },
+  {
+    "text": "Checking out a branch with ~2k changed files through Git Changes takes minutes and the UI is frozen the whole time: no progress, no cancel. Same checkout in Git Bash is 3 seconds. 17.14.12.",
+    "email": "h.schmidt@fabrikam.com",
+    "ageHours": 255
+  },
+  {
+    "text": "is anyone actually reading these? I've filed 3 things this year and never heard anything back.",
+    "email": null,
+    "ageHours": 240
+  },
+  {
+    "text": "Ctrl+. no longer offers \"Add using\" for types that live in referenced projects. It still works for types from NuGet packages. 18.1.2, SDK-style projects.",
+    "email": "o.petrenko@example.com",
+    "ageHours": 225
+  },
+  {
+    "text": "Extension crashes VS on startup since the latest update:\n\nSystem.NullReferenceException: Object reference not set to an instance of an object.\n   at Microsoft.VisualStudio.Shell.AsyncPackage.<InitializeAsync>d__12.MoveNext()\n   at Microsoft.VisualStudio.Threading.JoinableTask.CompleteOnCurrentThread()\n\nActivityLog.xml points at our internal extension, which hasn't changed in months. Starting with /safemode works.",
+    "email": "tools-team@contoso.com",
+    "ageHours": 210
+  },
+  {
+    "text": "Why doesn't the Diagnostic Tools window show CPU usage when I debug a .NET Framework 4.8 app? It works for net8. Is that a known limitation or something in my setup?",
+    "email": null,
+    "ageHours": 190
+  },
+  {
+    "text": "Let me stage individual lines, not just whole hunks, from the diff view in Git Changes. Every other Git client I use does this.",
+    "email": "m.ali@example.com",
+    "ageHours": 175
+  },
+  {
+    "text": "Every day: \"Your license has gone stale and must be updated.\" I click \"Check for an updated license\", it spins, then says it can't connect. We go through an authenticating proxy. VS 2026 18.1, Professional.",
+    "email": "e.novak@fabrikam.com",
+    "ageHours": 150
+  },
+  {
+    "text": "NuGet restore inside VS fails with NU1301 \"Unable to load the service index for source\" for our Azure Artifacts feed, but dotnet restore in a terminal works with the same nuget.config. The credential provider is installed.",
+    "email": null,
+    "ageHours": 130
+  },
+  {
+    "text": "Give me a way to turn off the inline Copilot ghost text per language. I want it in C# but not in YAML or JSON.",
+    "email": "c.dubois@example.com",
+    "ageHours": 110
+  },
+  {
+    "text": "The MSBuild docs page for Directory.Build.props says it is imported after the project file. It's imported early, from Microsoft.Common.props. Directory.Build.targets is the one imported late. Cost me an afternoon.",
+    "email": null,
+    "ageHours": 90
+  },
+  {
+    "text": "debugging is just really slow lately. each step takes a second or two. not sure what changed",
+    "email": null,
+    "ageHours": 70
+  },
+  {
+    "text": "Is there a way to see why a project rebuilt when nothing changed? Incremental build rebuilds our shared library every time and I can't tell which input it thinks is newer.",
+    "email": "b.oconnell@contoso.com",
+    "ageHours": 45
+  },
+  {
+    "text": "Installer is stuck at \"Preparing...\" 0% for an hour. Tried twice, rebooted. Windows 11 24H2, no proxy. The logs in %temp% don't say anything I can make sense of.",
+    "email": null,
+    "ageHours": 20
+  },
+  {
+    "text": "Git Changes shows every file as modified right after cloning on Windows. The diff is empty, so it's line endings. core.autocrlf is false and the repo has a .gitattributes. git status in a terminal is clean.",
+    "email": "y.tanaka@example.com",
+    "ageHours": 4
+  }
+]
