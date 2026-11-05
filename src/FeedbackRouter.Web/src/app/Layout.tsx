@@ -37,7 +37,10 @@ export function Layout() {
         )}
       </div>
       <main className={styles.main}>
-        <Outlet />
+        {me.data?.demo && <p className={styles.demo}>Demo: changes reset nightly, nothing is really filed</p>}
+        <div className={styles.content}>
+          <Outlet />
+        </div>
       </main>
     </div>
   )

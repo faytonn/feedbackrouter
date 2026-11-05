@@ -103,4 +103,4 @@ export type Stats = {
   decided: number
 }
 
-export type Me = { name: string | null; signInEnabled: boolean; signInUrl: string; signOutUrl: string }
+export type Me = { name: string | null; signInEnabled: boolean; demo: boolean; signInUrl: string; signOutUrl: string }

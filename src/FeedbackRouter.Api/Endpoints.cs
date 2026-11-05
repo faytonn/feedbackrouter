@@ -1,10 +1,9 @@
-using System.Text.Json;
 using FeedbackRouter.Api.Feedback;
 using FeedbackRouter.Api.Triage;
 using FeedbackRouter.Core.Domain;
 using FeedbackRouter.Infra.Data;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace FeedbackRouter.Api;
 
@@ -20,7 +19,8 @@ public static class Endpoints
 
         // Public: anyone can submit feedback.
         api.MapPost("/feedback", SubmitAsync).RequireRateLimiting(SubmitRateLimitPolicy);
-        api.MapGet("/me", (ReviewerIdentity reviewer) => new MeDto(reviewer.Name, reviewer.RequireSignIn, SignInUrl, SignOutUrl));
+        api.MapGet("/me", (ReviewerIdentity reviewer, IOptions<DemoOptions> demo) =>
+            new MeDto(reviewer.Name, reviewer.RequireSignIn, demo.Value.Enabled, SignInUrl, SignOutUrl));
 
         // Reviewers only.
         var review = api.MapGroup("").AddEndpointFilter(RequireReviewerAsync);
@@ -131,37 +131,18 @@ public static class Endpoints
         _ => throw new InvalidOperationException($"Unhandled outcome {outcome}"),
     };
 
-    private sealed record SeedItem(string Text, string? Email, double AgeHours);
-
-    private static async Task<IResult> SeedAsync(
-        FeedbackDbContext db, TriageSignal signal, TimeProvider clock, IConfiguration config, IHostEnvironment env,
-        CancellationToken ct)
+    private static async Task<IResult> SeedAsync(SeedImporter seed, CancellationToken ct)
     {
-        if (await db.FeedbackItems.AnyAsync(i => i.Source == FeedbackSource.Import, ct))
+        if (await seed.HasImportedAsync(ct))
         {
             return TypedResults.Problem("Seed items are already imported.", statusCode: StatusCodes.Status409Conflict);
         }
 
-        var path = Path.GetFullPath(config["Seed:Path"] ?? "../../seed/feedback.json", env.ContentRootPath);
-        if (!File.Exists(path))
+        if (!File.Exists(seed.SeedPath))
         {
-            return TypedResults.Problem($"Seed file not found at {path}.", statusCode: StatusCodes.Status500InternalServerError);
+            return TypedResults.Problem($"Seed file not found at {seed.SeedPath}.", statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        await using var stream = File.OpenRead(path);
-        var seed = await JsonSerializer.DeserializeAsync<List<SeedItem>>(stream, JsonSerializerOptions.Web, ct) ?? [];
-        var now = clock.GetUtcNow().UtcDateTime;
-
-        db.FeedbackItems.AddRange(seed.Select(s => new FeedbackItem
-        {
-            RawText = s.Text.Trim(),
-            SubmitterEmail = s.Email,
-            Source = FeedbackSource.Import,
-            SubmittedAt = now.AddHours(-s.AgeHours),
-        }));
-        await db.SaveChangesAsync(ct);
-        signal.Notify();
-
-        return TypedResults.Ok(new { imported = seed.Count });
+        return TypedResults.Ok(new { imported = await seed.ImportAsync(ct) });
     }
 }

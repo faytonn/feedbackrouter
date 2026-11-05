@@ -20,9 +20,7 @@ var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
 
 // Database
-builder.Services.AddDbContext<FeedbackDbContext>(o => o.UseSqlServer(
-    config.GetConnectionString("FeedbackRouter"),
-    sql => sql.EnableRetryOnFailure()));
+builder.Services.AddFeedbackDatabase(config);
 
 // LLM: provider chosen by configuration, wrapped with tracing and logging.
 builder.Services.Configure<LlmOptions>(config.GetSection(LlmOptions.Section));
@@ -45,6 +43,21 @@ builder.Services.AddHostedService<TriageWorker>();
 
 // Azure DevOps
 builder.Services.Configure<AzureDevOpsOptions>(config.GetSection(AzureDevOpsOptions.Section));
+
+// Public demo: never file, whatever else is configured.
+builder.Services.Configure<DemoOptions>(config.GetSection(DemoOptions.Section));
+var demo = config.GetSection(DemoOptions.Section).Get<DemoOptions>() ?? new DemoOptions();
+if (demo.Enabled)
+{
+    builder.Services.PostConfigure<AzureDevOpsOptions>(o =>
+    {
+        o.DryRun = true;
+        o.Pat = null;
+    });
+}
+
+builder.Services.AddScoped<SeedImporter>();
+builder.Services.AddHostedService<DemoResetService>();
 builder.Services.AddHttpClient<IWorkItemFiler, AzureDevOpsWorkItemFiler>(c => c.Timeout = TimeSpan.FromSeconds(30));
 
 builder.Services.AddScoped<FeedbackQueries>();
