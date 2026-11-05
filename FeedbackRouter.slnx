@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/FeedbackRouter.Api/FeedbackRouter.Api.csproj" />
+    <Project Path="src/FeedbackRouter.Core/FeedbackRouter.Core.csproj" />
+    <Project Path="src/FeedbackRouter.Infra/FeedbackRouter.Infra.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/FeedbackRouter.Tests/FeedbackRouter.Tests.csproj" />
+  </Folder>
+</Solution>

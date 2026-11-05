@@ -1,0 +1,12 @@
+bin/
+obj/
+.vs/
+*.user
+TestResults/
+
+node_modules/
+src/FeedbackRouter.Web/dist/
+src/FeedbackRouter.Api/wwwroot/
+
+.env
+appsettings.Local.json
