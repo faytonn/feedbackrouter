@@ -22,6 +22,8 @@ FROM mcr.microsoft.com/dotnet/aspnet:10.0
 WORKDIR /app
 COPY --from=build /app .
 COPY --from=web /web/dist ./wwwroot
+COPY seed/feedback.json /seed/feedback.json
+ENV Seed__Path=/seed/feedback.json
 ENV ASPNETCORE_HTTP_PORTS=8080
 EXPOSE 8080
 USER $APP_UID
