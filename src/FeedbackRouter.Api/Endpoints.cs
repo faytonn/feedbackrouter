@@ -20,7 +20,7 @@ public static class Endpoints
 
         // Public: anyone can submit feedback.
         api.MapPost("/feedback", SubmitAsync).RequireRateLimiting(SubmitRateLimitPolicy);
-        api.MapGet("/me", (ReviewerIdentity reviewer) => new MeDto(reviewer.Name, SignInUrl, SignOutUrl));
+        api.MapGet("/me", (ReviewerIdentity reviewer) => new MeDto(reviewer.Name, reviewer.RequireSignIn, SignInUrl, SignOutUrl));
 
         // Reviewers only.
         var review = api.MapGroup("").AddEndpointFilter(RequireReviewerAsync);

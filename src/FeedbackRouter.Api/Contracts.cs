@@ -69,7 +69,7 @@ public sealed record FeedbackDetailDto(
 public sealed record FilingTargetDto(string Organization, string Project, bool DryRun);
 
 /// <summary>The current reviewer; Name is null when sign-in is required and missing.</summary>
-public sealed record MeDto(string? Name, string SignInUrl, string SignOutUrl);
+public sealed record MeDto(string? Name, bool SignInEnabled, string SignInUrl, string SignOutUrl);
 
 public sealed record DecisionRequest(
     DecisionAction? Action,

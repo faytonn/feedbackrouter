@@ -18,18 +18,14 @@ public sealed class ReviewerIdentity(IHttpContextAccessor http, IConfiguration c
     {
         get
         {
+            if (!RequireSignIn)
+            {
+                // Without the platform sign-in in front, the header could come from anyone.
+                return config["Reviewer:Name"] is { Length: > 0 } name ? name : "reviewer";
+            }
+
             var header = http.HttpContext?.Request.Headers[PrincipalNameHeader].ToString();
-            if (!string.IsNullOrWhiteSpace(header))
-            {
-                return header.Trim();
-            }
-
-            if (RequireSignIn)
-            {
-                return null;
-            }
-
-            return config["Reviewer:Name"] is { Length: > 0 } name ? name : "reviewer";
+            return string.IsNullOrWhiteSpace(header) ? null : header.Trim();
         }
     }
 }
