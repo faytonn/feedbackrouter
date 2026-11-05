@@ -1,0 +1,70 @@
+/*
+ * Design tokens. Every color, size and duration in the app comes from here.
+ * One accent (--accent) for links, focus rings and the primary button only.
+ */
+:root {
+  /* Surfaces */
+  --bg-chrome: #f6f7f8;
+  --bg-pane: #ffffff;
+  --bg-row-hover: #f6f8fa;
+  --bg-row-selected: #eaeef2;
+  --bg-subtle: #f6f8fa;
+  --bg-skeleton: #eaeef2;
+
+  /* Text */
+  --text: #1f2328;
+  --text-secondary: #656d76;
+  --text-on-accent: #ffffff;
+  --text-error: #b3261e;
+
+  /* Lines */
+  --border: #d0d7de;
+  --border-width: 1px;
+
+  /* Accent */
+  --accent: #0969da;
+  --accent-hover: #0860c4;
+  --focus-ring: 0 0 0 2px var(--bg-pane), 0 0 0 4px var(--accent);
+
+  /* Severity: muted, ordered by weight, not a traffic light */
+  --sev-1: #7f4a55;
+  --sev-2: #8a6a3d;
+  --sev-3: #56708a;
+  --sev-4: #9aa3ad;
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+
+  /* Type */
+  --font-sans: -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, "Cascadia Mono", "SF Mono", Consolas, monospace;
+  --text-xs: 12px;
+  --text-sm: 13px;
+  --text-md: 15px;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --line-tight: 18px;
+  --line-body: 20px;
+
+  /* Sizes */
+  --row-height: 36px;
+  --header-row-height: 32px;
+  --control-height: 28px;
+  --rail-width: 184px;
+  --detail-width: 420px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --icon-size: 14px;
+
+  /* Elevation: only the open detail pane gets a shadow */
+  --shadow-pane: 0 1px 3px rgba(31, 35, 40, 0.06);
+
+  /* Motion */
+  --fade: 120ms;
+}

@@ -1,0 +1,117 @@
+.pane {
+  display: flex;
+  flex-direction: column;
+  width: var(--detail-width);
+  min-width: var(--detail-width);
+  height: 100%;
+  background: var(--bg-pane);
+  border-left: var(--border-width) solid var(--border);
+  box-shadow: var(--shadow-pane);
+  animation: fade var(--fade) linear;
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: 48px;
+  padding: 0 var(--space-2) 0 var(--space-4);
+  border-bottom: var(--border-width) solid var(--border);
+  flex: none;
+}
+
+.heading {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  font-weight: var(--weight-semibold);
+}
+
+.meta {
+  color: var(--text-secondary);
+  font-size: var(--text-xs);
+}
+
+.close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-height);
+  height: var(--control-height);
+  margin-left: auto;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.close:hover {
+  background: var(--bg-subtle);
+  color: var(--text);
+}
+
+.close svg {
+  width: var(--icon-size);
+  height: var(--icon-size);
+}
+
+.body {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-bottom: var(--border-width) solid var(--border);
+}
+
+.section:last-child {
+  border-bottom: none;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.raw {
+  margin: 0;
+  padding: var(--space-3);
+  max-height: 240px;
+  overflow: auto;
+  background: var(--bg-subtle);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-md);
+  line-height: var(--line-tight);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-top: var(--border-width) solid var(--border);
+  flex: none;
+}
+
+.error {
+  color: var(--text-error);
+  font-size: var(--text-sm);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
