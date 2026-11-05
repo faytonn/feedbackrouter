@@ -49,6 +49,9 @@ builder.Services.AddHttpClient<IWorkItemFiler, AzureDevOpsWorkItemFiler>(c => c.
 
 builder.Services.AddScoped<FeedbackQueries>();
 builder.Services.AddScoped<DecisionService>();
+builder.Services.AddScoped<ReviewService>();
+builder.Services.AddHostedService<ReviewSweeper>();
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<StatsQuery>();
 builder.Services.AddScoped<ReviewerIdentity>();
 

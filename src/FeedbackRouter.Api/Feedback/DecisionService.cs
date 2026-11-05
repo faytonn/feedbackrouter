@@ -33,9 +33,7 @@ public sealed partial class DecisionService(
     /// <summary>How long a filing attempt holds the item before another approve may retry it.</summary>
     public static readonly TimeSpan FilingLease = TimeSpan.FromMinutes(2);
 
-    private static readonly FeedbackStatus[] Reviewable = [FeedbackStatus.Proposed, FeedbackStatus.InReview];
-
-    private static readonly FeedbackStatus[] Closable =
+    private static readonly FeedbackStatus[] Open =
         [FeedbackStatus.New, FeedbackStatus.Proposed, FeedbackStatus.InReview];
 
     public Task<DecisionOutcome> DecideAsync(int id, DecisionRequest request, string reviewer, CancellationToken ct) =>
@@ -58,19 +56,21 @@ public sealed partial class DecisionService(
             return new DecisionOutcome.NotFound();
         }
 
+        // Without a proposal (triage off or failed) the reviewer supplies every field.
         var proposal = item.Proposals.OrderByDescending(p => p.ProposedAt).ThenByDescending(p => p.Id).FirstOrDefault();
-        if (proposal is null)
+        var area = request.Area ?? item.Decision?.FinalArea ?? proposal?.Area;
+        var type = request.Type ?? item.Decision?.FinalType ?? proposal?.Type;
+        var severity = request.Severity ?? item.Decision?.FinalSeverity ?? proposal?.Severity;
+        var title = (request.Title ?? item.Decision?.FinalTitle ?? proposal?.Title)?.Trim();
+        var summary = (request.Summary ?? item.Decision?.FinalSummary ?? proposal?.Summary)?.Trim();
+
+        if (area is not { } finalArea || type is not { } finalType || severity is not { } finalSeverity
+            || title is null || summary is null)
         {
-            return new DecisionOutcome.Conflict("This item has no proposal yet, so there is nothing to approve.");
+            return new DecisionOutcome.Invalid("Set area, type, severity, title and summary before approving.");
         }
 
-        var area = request.Area ?? item.Decision?.FinalArea ?? proposal.Area;
-        var type = request.Type ?? item.Decision?.FinalType ?? proposal.Type;
-        var severity = request.Severity ?? item.Decision?.FinalSeverity ?? proposal.Severity;
-        var title = (request.Title ?? item.Decision?.FinalTitle ?? proposal.Title).Trim();
-        var summary = (request.Summary ?? item.Decision?.FinalSummary ?? proposal.Summary).Trim();
-
-        if (severity is < 1 or > 4)
+        if (finalSeverity is < 1 or > 4)
         {
             return new DecisionOutcome.Invalid("Severity must be from 1 to 4.");
         }
@@ -87,20 +87,27 @@ public sealed partial class DecisionService(
 
         var now = clock.GetUtcNow().UtcDateTime;
         var leaseExpired = now - FilingLease;
+        var idleBefore = now - ReviewService.IdleTimeout;
 
         var claimed = await InTransactionAsync(async () =>
         {
-            // First approve: Proposed/InReview -> Approved. Retry after a failed
-            // filing: Approved with no live claim. Anything else claims nothing.
+            // First approve: an open item nobody else is reviewing -> Approved.
+            // Retry after a failed filing: Approved with no live claim.
             var rows = await db.FeedbackItems
                 .Where(i => i.Id == id
                             && i.WorkItemLink == null
-                            && (Reviewable.Contains(i.Status)
+                            && ((Open.Contains(i.Status)
+                                 && (i.Status != FeedbackStatus.InReview
+                                     || i.ReviewerName == reviewer
+                                     || i.ReviewActivityAt == null
+                                     || i.ReviewActivityAt < idleBefore))
                                 || (i.Status == FeedbackStatus.Approved
                                     && (i.FilingClaimedAt == null || i.FilingClaimedAt < leaseExpired))))
                 .ExecuteUpdateAsync(s => s
                     .SetProperty(i => i.Status, FeedbackStatus.Approved)
-                    .SetProperty(i => i.FilingClaimedAt, now), ct);
+                    .SetProperty(i => i.FilingClaimedAt, now)
+                    .SetProperty(i => i.ReviewerName, (string?)null)
+                    .SetProperty(i => i.ReviewActivityAt, (DateTime?)null), ct);
             if (rows == 0)
             {
                 return false;
@@ -108,9 +115,9 @@ public sealed partial class DecisionService(
 
             await UpsertDecisionAsync(id, DecisionAction.Approve, reviewer, now, request.Notes, d =>
             {
-                d.FinalArea = area;
-                d.FinalType = type;
-                d.FinalSeverity = severity;
+                d.FinalArea = finalArea;
+                d.FinalType = finalType;
+                d.FinalSeverity = finalSeverity;
                 d.FinalTitle = title;
                 d.FinalSummary = summary;
             }, ct);
@@ -125,7 +132,7 @@ public sealed partial class DecisionService(
         FilingResult result;
         try
         {
-            result = await filer.FileAsync(new WorkItemRequest(id, area, type, severity, title, summary, item.RawText), ct);
+            result = await filer.FileAsync(new WorkItemRequest(id, finalArea, finalType, finalSeverity, title, summary, item.RawText), ct);
         }
         catch (WorkItemFilingException ex)
         {
@@ -200,13 +207,21 @@ public sealed partial class DecisionService(
         CancellationToken ct)
     {
         var now = clock.GetUtcNow().UtcDateTime;
+        var idleBefore = now - ReviewService.IdleTimeout;
         var done = await InTransactionAsync(async () =>
         {
             var rows = await db.FeedbackItems
-                .Where(i => i.Id == id && Closable.Contains(i.Status))
+                .Where(i => i.Id == id
+                            && Open.Contains(i.Status)
+                            && (i.Status != FeedbackStatus.InReview
+                                || i.ReviewerName == reviewer
+                                || i.ReviewActivityAt == null
+                                || i.ReviewActivityAt < idleBefore))
                 .ExecuteUpdateAsync(s => s
                     .SetProperty(i => i.Status, status)
-                    .SetProperty(i => i.MergedIntoId, mergeIntoId), ct);
+                    .SetProperty(i => i.MergedIntoId, mergeIntoId)
+                    .SetProperty(i => i.ReviewerName, (string?)null)
+                    .SetProperty(i => i.ReviewActivityAt, (DateTime?)null), ct);
             if (rows == 0)
             {
                 return false;
@@ -242,7 +257,7 @@ public sealed partial class DecisionService(
     {
         var current = await db.FeedbackItems.AsNoTracking()
             .Where(i => i.Id == id)
-            .Select(i => new { i.Status, i.MergedIntoId, WorkItemId = i.WorkItemLink!.AdoWorkItemId })
+            .Select(i => new { i.Status, i.MergedIntoId, i.ReviewerName, WorkItemId = i.WorkItemLink!.AdoWorkItemId })
             .SingleOrDefaultAsync(ct);
 
         return current?.Status switch
@@ -254,7 +269,7 @@ public sealed partial class DecisionService(
             FeedbackStatus.Approved => new DecisionOutcome.Conflict("Filing is already in progress for this item."),
             FeedbackStatus.Merged => new DecisionOutcome.Conflict($"Already merged into item {current.MergedIntoId}."),
             FeedbackStatus.Dismissed => new DecisionOutcome.Conflict("Already dismissed."),
-            FeedbackStatus.New => new DecisionOutcome.Conflict("This item has no proposal yet."),
+            FeedbackStatus.InReview => new DecisionOutcome.Conflict($"Being reviewed by {current.ReviewerName}."),
             _ => new DecisionOutcome.Conflict($"Item is {current.Status}."),
         };
     }

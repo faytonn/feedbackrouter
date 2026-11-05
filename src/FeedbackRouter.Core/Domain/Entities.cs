@@ -21,6 +21,11 @@ public sealed class FeedbackItem
     // approve cannot start a second filing.
     public DateTime? FilingClaimedAt { get; set; }
 
+    // Set while a reviewer has the item in InReview. The claim lapses after
+    // a period with no activity, and the item returns to New or Proposed.
+    public string? ReviewerName { get; set; }
+    public DateTime? ReviewActivityAt { get; set; }
+
     public List<TriageProposal> Proposals { get; set; } = [];
     public TriageDecision? Decision { get; set; }
     public WorkItemLink? WorkItemLink { get; set; }

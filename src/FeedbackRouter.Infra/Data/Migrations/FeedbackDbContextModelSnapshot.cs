@@ -46,6 +46,13 @@ namespace FeedbackRouter.Infra.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime?>("ReviewActivityAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ReviewerName")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
                     b.Property<string>("Source")
                         .IsRequired()
                         .HasMaxLength(16)

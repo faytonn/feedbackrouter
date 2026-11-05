@@ -16,7 +16,9 @@ public sealed record QueueItemDto(
     DateTime SubmittedAt,
     int DuplicateCount,
     FeedbackStatus Status,
-    string? TriageError);
+    string? TriageError,
+    string? ReviewerName,
+    WorkItemDto? WorkItem);
 
 public sealed record ProposalDto(
     Area Area,
@@ -42,6 +44,9 @@ public sealed record DecisionDto(
     string? FinalSummary,
     string? Notes);
 
+/// <summary>Who holds the item in InReview, and when the claim lapses without activity.</summary>
+public sealed record ReviewDto(string ReviewerName, DateTime LastActivityAt, DateTime ExpiresAt);
+
 public sealed record WorkItemDto(int? Id, string? Url, DateTime FiledAt, bool DryRun);
 
 public sealed record FeedbackDetailDto(
@@ -53,6 +58,7 @@ public sealed record FeedbackDetailDto(
     FeedbackStatus Status,
     int? MergedIntoId,
     string? TriageError,
+    ReviewDto? Review,
     ProposalDto? Proposal,
     IReadOnlyList<DuplicateDto> Duplicates,
     DecisionDto? Decision,
@@ -61,6 +67,9 @@ public sealed record FeedbackDetailDto(
 
 /// <summary>Where an approve would file, so the UI can say so before the reviewer clicks.</summary>
 public sealed record FilingTargetDto(string Organization, string Project, bool DryRun);
+
+/// <summary>The current reviewer; Name is null when sign-in is required and missing.</summary>
+public sealed record MeDto(string? Name, string SignInUrl, string SignOutUrl);
 
 public sealed record DecisionRequest(
     DecisionAction? Action,

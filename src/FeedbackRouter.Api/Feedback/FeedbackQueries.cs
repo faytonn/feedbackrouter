@@ -27,7 +27,9 @@ public sealed class FeedbackQueries(FeedbackDbContext db, IOptions<AzureDevOpsOp
                 i.SubmittedAt,
                 i.Status,
                 i.TriageError,
+                i.ReviewerName,
                 Decision = i.Decision,
+                Link = i.WorkItemLink,
                 Proposal = i.Proposals.OrderByDescending(p => p.ProposedAt).ThenByDescending(p => p.Id)
                     .Select(p => new { p.Area, p.Type, p.Severity, p.Title, Duplicates = p.DuplicateCandidates.Count })
                     .FirstOrDefault(),
@@ -47,7 +49,9 @@ public sealed class FeedbackQueries(FeedbackDbContext db, IOptions<AzureDevOpsOp
                 r.SubmittedAt,
                 r.Proposal?.Duplicates ?? 0,
                 r.Status,
-                r.TriageError);
+                r.TriageError,
+                r.ReviewerName,
+                r.Link is { } l ? new WorkItemDto(l.AdoWorkItemId, l.AdoUrl, l.FiledAt, l.DryRun) : null);
         });
 
         if (area is { } a)
@@ -91,6 +95,9 @@ public sealed class FeedbackQueries(FeedbackDbContext db, IOptions<AzureDevOpsOp
             item.Status,
             item.MergedIntoId,
             item.TriageError,
+            item is { Status: FeedbackStatus.InReview, ReviewerName: { } reviewer, ReviewActivityAt: { } activity }
+                ? new ReviewDto(reviewer, activity, activity + ReviewService.IdleTimeout)
+                : null,
             proposal is null
                 ? null
                 : new ProposalDto(proposal.Area, proposal.Type, proposal.Severity, proposal.Title, proposal.Summary,

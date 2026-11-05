@@ -15,7 +15,7 @@ namespace FeedbackRouter.Tests.Endpoints;
 /// each request gets its own connection and concurrent requests behave like
 /// they would against SQL Server.
 /// </summary>
-public sealed class ApiFactory : WebApplicationFactory<Program>
+public sealed class ApiFactory(bool requireSignIn = false) : WebApplicationFactory<Program>
 {
     private readonly string _dbPath = Path.Combine(Path.GetTempPath(), $"feedbackrouter-{Guid.NewGuid():N}.db");
 
@@ -27,6 +27,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
         builder.UseSetting("Llm:ApiKey", "");
         builder.UseSetting("Telemetry:ConsoleExporter", "false");
         builder.UseSetting("ConnectionStrings:FeedbackRouter", "unused");
+        builder.UseSetting("Auth:RequireSignIn", requireSignIn ? "true" : "false");
 
         // Migrations target SQL Server; the SQLite schema comes from EnsureCreated.
         builder.UseSetting("Database:MigrateOnStartup", "false");

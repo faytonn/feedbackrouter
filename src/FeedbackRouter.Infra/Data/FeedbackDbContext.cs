@@ -38,6 +38,7 @@ public sealed class FeedbackDbContext(DbContextOptions<FeedbackDbContext> option
             e.Property(x => x.RawText).IsRequired();
             e.Property(x => x.SubmitterEmail).HasMaxLength(320);
             e.Property(x => x.TriageError).HasMaxLength(1000);
+            e.Property(x => x.ReviewerName).HasMaxLength(200);
             e.Property(x => x.Embedding)
                 .HasConversion(EmbeddingSerializer.Converter, EmbeddingComparer);
             e.HasIndex(x => x.Status);
