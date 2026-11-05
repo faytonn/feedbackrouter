@@ -1,4 +1,4 @@
-import type { HTMLAttributes, ReactNode, TdHTMLAttributes } from 'react'
+import type { ComponentProps, ReactNode } from 'react'
 import styles from './Table.module.css'
 
 export type Column = { key: string; label: string; width?: number; align?: 'left' | 'right' }
@@ -21,7 +21,7 @@ export function Table({ columns, children }: { columns: Column[]; children: Reac
   )
 }
 
-export function Row({ selected, className, ...rest }: HTMLAttributes<HTMLTableRowElement> & { selected?: boolean }) {
+export function Row({ selected, className, ...rest }: ComponentProps<'tr'> & { selected?: boolean }) {
   return (
     <tr
       className={[styles.row, selected && styles.selected, className].filter(Boolean).join(' ')}
@@ -31,7 +31,7 @@ export function Row({ selected, className, ...rest }: HTMLAttributes<HTMLTableRo
   )
 }
 
-export function Cell({ align, muted, mono, className, ...rest }: TdHTMLAttributes<HTMLTableCellElement> & {
+export function Cell({ align, muted, mono, className, ...rest }: ComponentProps<'td'> & {
   align?: 'left' | 'right'
   muted?: boolean
   mono?: boolean

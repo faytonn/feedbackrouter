@@ -1,0 +1,48 @@
+.app {
+  display: flex;
+  height: 100%;
+}
+
+.rail {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--bg-chrome);
+  border-right: var(--border-width) solid var(--border);
+}
+
+/* The Rail draws its own border; the wrapper owns it so the account line sits inside. */
+.rail > nav {
+  flex: 1;
+  height: auto;
+  border-right: none;
+}
+
+.account {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: var(--rail-width);
+  padding: var(--space-3) var(--space-4);
+  border-top: var(--border-width) solid var(--border);
+  font-size: var(--text-xs);
+}
+
+.name {
+  overflow: hidden;
+  color: var(--text-secondary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.main {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  background: var(--bg-pane);
+}
+
+.notice {
+  padding: var(--space-4);
+  color: var(--text-secondary);
+}

@@ -11,10 +11,6 @@
   flex: none;
 }
 
-.name {
-  color: var(--text-secondary);
-}
-
 .none {
   color: var(--text-secondary);
 }

@@ -1,0 +1,65 @@
+.status {
+  color: var(--text-secondary);
+  font-weight: var(--weight-regular);
+}
+
+.banner {
+  padding: var(--space-2) var(--space-4);
+  border-bottom: var(--border-width) solid var(--border);
+  background: var(--bg-subtle);
+  color: var(--text-secondary);
+}
+
+.secondary {
+  color: var(--text-secondary);
+}
+
+.grid3 {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr;
+  gap: var(--space-2);
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.dupes {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.dupes li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--row-height);
+  padding: var(--space-1) var(--space-1) var(--space-1) var(--space-3);
+}
+
+.dupes li + li {
+  border-top: var(--border-width) solid var(--border);
+}
+
+.dupId {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+}
+
+.dupTitle {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.similarity {
+  color: var(--text-secondary);
+}

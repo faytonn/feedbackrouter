@@ -1,17 +1,16 @@
+import { severityNames } from '../lib/format'
 import styles from './Severity.module.css'
 
-const names: Record<number, string> = { 1: 'Critical', 2: 'High', 3: 'Medium', 4: 'Low' }
-
-export function Severity({ value, showName }: { value: number | null; showName?: boolean }) {
+/** A muted swatch, always next to the number and name so color is never the only signal. */
+export function Severity({ value }: { value: number | null }) {
   if (value == null) {
     return <span className={styles.none}>-</span>
   }
 
   return (
-    <span className={styles.severity} title={`Severity ${value}: ${names[value]}`}>
-      <span className={styles.swatch} style={{ background: `var(--sev-${value})` }} />
-      {value}
-      {showName && <span className={styles.name}>{names[value]}</span>}
+    <span className={styles.severity}>
+      <span className={styles.swatch} style={{ background: `var(--sev-${value})` }} aria-hidden />
+      {value} {severityNames[value]}
     </span>
   )
 }

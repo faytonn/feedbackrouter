@@ -14,7 +14,7 @@ const columns: Column[] = [
   { key: 'title', label: 'Title' },
   { key: 'area', label: 'Area', width: 136 },
   { key: 'type', label: 'Type', width: 108 },
-  { key: 'severity', label: 'Severity', width: 72 },
+  { key: 'severity', label: 'Severity', width: 104 },
   { key: 'age', label: 'Age', width: 52, align: 'right' },
   { key: 'dups', label: 'Duplicates', width: 84, align: 'right' },
   { key: 'status', label: 'Status', width: 88 },
@@ -184,10 +184,10 @@ function ComponentsView() {
         </Field>
       </Specimen>
       <Specimen label="Severity">
-        <Severity value={1} showName />
-        <Severity value={2} showName />
-        <Severity value={3} showName />
-        <Severity value={4} showName />
+        <Severity value={1} />
+        <Severity value={2} />
+        <Severity value={3} />
+        <Severity value={4} />
         <Severity value={null} />
       </Specimen>
       <Specimen label="Table: rows, hover, selected, skeleton">

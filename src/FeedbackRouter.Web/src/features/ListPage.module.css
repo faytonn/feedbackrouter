@@ -1,0 +1,78 @@
+.page {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+}
+
+.list {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: 48px;
+  padding: 0 var(--space-4);
+  border-bottom: var(--border-width) solid var(--border);
+  flex: none;
+}
+
+.filters {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  height: 44px;
+  padding: 0 var(--space-4);
+  border-bottom: var(--border-width) solid var(--border);
+  flex: none;
+}
+
+.count {
+  margin-left: auto;
+  color: var(--text-secondary);
+}
+
+.scroll {
+  flex: 1;
+  overflow: auto;
+}
+
+.message {
+  padding: var(--space-4);
+  color: var(--text-secondary);
+}
+
+.messageError {
+  padding: var(--space-4);
+}
+
+.keys {
+  height: 32px;
+  padding: 0 var(--space-4);
+  border-top: var(--border-width) solid var(--border);
+  color: var(--text-secondary);
+  font-size: var(--text-xs);
+  line-height: 32px;
+  flex: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.keys kbd {
+  padding: 0 4px;
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-subtle);
+}
+
+.statusCell {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}

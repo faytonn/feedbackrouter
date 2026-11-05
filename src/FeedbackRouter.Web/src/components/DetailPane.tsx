@@ -43,3 +43,14 @@ export function RawText({ children }: { children: string }) {
 export function InlineError({ children }: { children: ReactNode }) {
   return <p className={styles.error} role="alert">{children}</p>
 }
+
+/** Placeholder lines while the pane loads. */
+export function SkeletonLines({ count }: { count: number }) {
+  return (
+    <div className={styles.skeleton} aria-hidden>
+      {Array.from({ length: count }, (_, i) => (
+        <span key={i} className={styles.skeletonLine} style={{ width: `${90 - ((i * 17) % 40)}%` }} />
+      ))}
+    </div>
+  )
+}
