@@ -17,5 +17,8 @@ csharp_style_var_when_type_is_apparent = true:suggestion
 dotnet_sort_system_directives_first = true
 dotnet_style_readonly_field = true:warning
 
+[**/Migrations/*.cs]
+generated_code = true
+
 [*.md]
 trim_trailing_whitespace = false

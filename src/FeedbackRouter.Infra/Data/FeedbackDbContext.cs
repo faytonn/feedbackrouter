@@ -32,6 +32,10 @@ public sealed class FeedbackDbContext(DbContextOptions<FeedbackDbContext> option
             e.Property(x => x.Embedding)
                 .HasConversion(EmbeddingSerializer.Converter, EmbeddingComparer);
             e.HasIndex(x => x.Status);
+
+            // A tracked save of an item fails if its status changed underneath,
+            // e.g. a reviewer dismissed it while the triage worker was running.
+            e.Property(x => x.Status).IsConcurrencyToken();
             e.HasOne<FeedbackItem>().WithMany().HasForeignKey(x => x.MergedIntoId).OnDelete(DeleteBehavior.NoAction);
             e.HasMany(x => x.Proposals).WithOne().HasForeignKey(p => p.FeedbackItemId);
             e.HasOne(x => x.Decision).WithOne().HasForeignKey<TriageDecision>(d => d.FeedbackItemId);
