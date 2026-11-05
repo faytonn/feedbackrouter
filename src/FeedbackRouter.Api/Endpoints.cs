@@ -11,7 +11,7 @@ public static class Endpoints
 {
     public const string SubmitRateLimitPolicy = "submit";
     public const int MinTextLength = 10;
-    public const int MaxTextLength = 10_000;
+    public const int MaxTextLength = 4_000;
 
     public static void MapFeedbackRouter(this WebApplication app)
     {

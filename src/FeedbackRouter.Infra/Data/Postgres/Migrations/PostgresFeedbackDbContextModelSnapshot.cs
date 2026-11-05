@@ -87,6 +87,19 @@ namespace FeedbackRouter.Infra.Data.Postgres.Migrations
                     b.ToTable("FeedbackItems", (string)null);
                 });
 
+            modelBuilder.Entity("FeedbackRouter.Core.Domain.LlmUsage", b =>
+                {
+                    b.Property<DateOnly>("Day")
+                        .HasColumnType("date");
+
+                    b.Property<int>("Calls")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Day");
+
+                    b.ToTable("LlmUsage", (string)null);
+                });
+
             modelBuilder.Entity("FeedbackRouter.Core.Domain.TriageDecision", b =>
                 {
                     b.Property<int>("FeedbackItemId")

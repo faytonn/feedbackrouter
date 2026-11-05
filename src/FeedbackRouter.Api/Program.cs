@@ -29,9 +29,13 @@ if (llm.IsConfigured)
 {
     builder.Services.AddChatClient(_ => LlmClientFactory.CreateChatClient(llm)).UseOpenTelemetry().UseLogging();
     builder.Services.AddEmbeddingGenerator(_ => LlmClientFactory.CreateEmbeddingGenerator(llm)).UseOpenTelemetry().UseLogging();
-    builder.Services.AddScoped<ITriageModel>(sp => new ChatClientTriageModel(sp.GetRequiredService<IChatClient>(), llm.ChatModel));
-    builder.Services.AddScoped<ITextEmbedder>(sp => new EmbeddingGeneratorEmbedder(
-        sp.GetRequiredService<IEmbeddingGenerator<string, Embedding<float>>>(), llm.EmbeddingModel));
+    // Every model call counts against Triage:DailyLlmCallCap.
+    builder.Services.AddScoped<ITriageModel>(sp => new BudgetedTriageModel(
+        new ChatClientTriageModel(sp.GetRequiredService<IChatClient>(), llm.ChatModel),
+        sp.GetRequiredService<LlmCallBudget>()));
+    builder.Services.AddScoped<ITextEmbedder>(sp => new BudgetedEmbedder(
+        new EmbeddingGeneratorEmbedder(sp.GetRequiredService<IEmbeddingGenerator<string, Embedding<float>>>(), llm.EmbeddingModel),
+        sp.GetRequiredService<LlmCallBudget>()));
     builder.Services.AddScoped<TriagePipeline>();
 }
 
@@ -39,6 +43,7 @@ builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSingleton(_ => TriagePrompt.Load(config["Triage:PromptVersion"] ?? TriagePrompt.CurrentVersion));
 builder.Services.Configure<TriageOptions>(config.GetSection(TriageOptions.Section));
 builder.Services.AddSingleton<TriageSignal>();
+builder.Services.AddSingleton<LlmCallBudget>();
 builder.Services.AddHostedService<TriageWorker>();
 
 // Azure DevOps

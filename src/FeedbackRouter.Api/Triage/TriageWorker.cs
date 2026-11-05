@@ -46,6 +46,12 @@ public sealed class TriageOptions
 
     /// <summary>Wait after a failed run, multiplied by the number of attempts so far.</summary>
     public TimeSpan RetryBackoff { get; set; } = TimeSpan.FromMinutes(1);
+
+    /// <summary>
+    /// Model calls (chat and embedding) allowed per UTC day across the app. One item
+    /// takes 2 or 3. Past the cap, new items stay in New without a proposal.
+    /// </summary>
+    public int DailyLlmCallCap { get; set; } = 50;
 }
 
 /// <summary>
@@ -55,6 +61,7 @@ public sealed class TriageOptions
 public sealed partial class TriageWorker(
     IServiceScopeFactory scopes,
     TriageSignal signal,
+    LlmCallBudget budget,
     IOptions<TriageOptions> options,
     IOptions<LlmOptions> llm,
     TimeProvider clock,
@@ -96,6 +103,12 @@ public sealed partial class TriageWorker(
         var pipeline = scope.ServiceProvider.GetRequiredService<TriagePipeline>();
         var now = clock.GetUtcNow().UtcDateTime;
 
+        if (!await budget.HasRemainingAsync(ct))
+        {
+            LogCapReached(logger, budget.Cap);
+            return 0;
+        }
+
         var candidates = await db.FeedbackItems
             .Where(i => i.Status == FeedbackStatus.New && i.TriageAttempts < _options.MaxAttempts)
             .OrderBy(i => i.SubmittedAt)
@@ -115,7 +128,19 @@ public sealed partial class TriageWorker(
         var pool = await LoadPoolAsync(db, ct);
         foreach (var item in due)
         {
-            var proposal = await TriageOneAsync(db, pipeline, item, pool, ct);
+            TriageProposal? proposal;
+            try
+            {
+                proposal = await TriageOneAsync(db, pipeline, item, pool, ct);
+            }
+            catch (LlmBudgetExhaustedException)
+            {
+                // Leave this item untouched: no attempt counted, no error, still New.
+                db.ChangeTracker.Clear();
+                LogCapReached(logger, budget.Cap);
+                return 0;
+            }
+
             if (proposal is not null && item.Embedding is not null)
             {
                 // Later items in this batch can be matched against this one.
@@ -160,7 +185,7 @@ public sealed partial class TriageWorker(
                     break;
             }
         }
-        catch (Exception ex) when (ex is not OperationCanceledException)
+        catch (Exception ex) when (ex is not OperationCanceledException and not LlmBudgetExhaustedException)
         {
             item.TriageError = Truncate($"Triage failed: {ex.Message}", 1000);
             activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
@@ -205,6 +230,9 @@ public sealed partial class TriageWorker(
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Llm is not configured; triage worker is off and items stay in New")]
     private static partial void LogNotConfigured(ILogger logger);
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Daily cap of {Cap} model calls reached; new items stay in New until tomorrow (UTC)")]
+    private static partial void LogCapReached(ILogger logger, int cap);
 
     [LoggerMessage(Level = LogLevel.Error, Message = "Triage batch failed")]
     private static partial void LogBatchFailed(ILogger logger, Exception ex);

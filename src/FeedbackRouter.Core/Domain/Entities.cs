@@ -78,3 +78,10 @@ public sealed class WorkItemLink
     public DateTime FiledAt { get; set; }
     public bool DryRun { get; set; }
 }
+
+/// <summary>Model calls (chat and embedding) made by triage on one UTC day, for the daily cap.</summary>
+public sealed class LlmUsage
+{
+    public DateOnly Day { get; set; }
+    public int Calls { get; set; }
+}

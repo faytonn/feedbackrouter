@@ -7,7 +7,7 @@ import { Field, Input, Textarea } from '../components/Field'
 import styles from './Page.module.css'
 
 const minLength = 10
-const maxLength = 10_000
+const maxLength = 4_000
 
 export function SubmitPage() {
   const submit = useSubmit()

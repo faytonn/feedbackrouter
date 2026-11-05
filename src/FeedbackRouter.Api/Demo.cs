@@ -1,6 +1,7 @@
 using System.Text.Json;
 using FeedbackRouter.Api.Triage;
 using FeedbackRouter.Core.Domain;
+using FeedbackRouter.Core.Triage;
 using FeedbackRouter.Infra.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -21,26 +22,61 @@ public sealed class DemoOptions
 /// <summary>Loads seed/feedback.json. Used by POST /api/seed in Development and by the demo reset.</summary>
 public sealed class SeedImporter(FeedbackDbContext db, TriageSignal signal, TimeProvider clock, IConfiguration config, IHostEnvironment env)
 {
-    private sealed record SeedItem(string Text, string? Email, double AgeHours);
+    private sealed record SeedItem(string Text, string? Email, double AgeHours, SeedProposal? Proposal);
+
+    /// <summary>
+    /// A proposal generated ahead of time and stored with the seed, so the demo shows
+    /// proposals without live model calls. Reply follows the triage prompt's JSON contract.
+    /// </summary>
+    private sealed record SeedProposal(string Model, string PromptVersion, JsonElement Reply);
 
     public string SeedPath => Path.GetFullPath(config["Seed:Path"] ?? "../../seed/feedback.json", env.ContentRootPath);
 
     public Task<bool> HasImportedAsync(CancellationToken ct) =>
         db.FeedbackItems.AnyAsync(i => i.Source == FeedbackSource.Import, ct);
 
-    /// <summary>Adds the seed items, aged relative to now. Throws if the file is missing.</summary>
+    /// <summary>
+    /// Adds the seed items, aged relative to now. Items with a stored proposal arrive as
+    /// Proposed; it is validated by the same parser as live replies. Throws if the file is missing.
+    /// </summary>
     public async Task<int> ImportAsync(CancellationToken ct)
     {
         await using var stream = File.OpenRead(SeedPath);
         var seed = await JsonSerializer.DeserializeAsync<List<SeedItem>>(stream, JsonSerializerOptions.Web, ct) ?? [];
         var now = clock.GetUtcNow().UtcDateTime;
 
-        db.FeedbackItems.AddRange(seed.Select(s => new FeedbackItem
+        db.FeedbackItems.AddRange(seed.Select((s, index) =>
         {
-            RawText = s.Text.Trim(),
-            SubmitterEmail = s.Email,
-            Source = FeedbackSource.Import,
-            SubmittedAt = now.AddHours(-s.AgeHours),
+            var item = new FeedbackItem
+            {
+                RawText = s.Text.Trim(),
+                SubmitterEmail = s.Email,
+                Source = FeedbackSource.Import,
+                SubmittedAt = now.AddHours(-s.AgeHours),
+            };
+            if (s.Proposal is { } p)
+            {
+                if (!TriageResponseParser.TryParse(p.Reply.GetRawText(), out var parsed, out var error))
+                {
+                    throw new InvalidDataException($"Seed item {index + 1} has an invalid proposal: {error}");
+                }
+
+                item.Status = FeedbackStatus.Proposed;
+                item.Proposals.Add(new TriageProposal
+                {
+                    Area = parsed!.Area,
+                    Type = parsed.Type,
+                    Severity = parsed.Severity,
+                    Title = parsed.Title,
+                    Summary = parsed.Summary,
+                    Confidence = parsed.Confidence,
+                    ProposedAt = now,
+                    ModelName = p.Model,
+                    PromptVersion = p.PromptVersion,
+                });
+            }
+
+            return item;
         }));
         await db.SaveChangesAsync(ct);
         signal.Notify();

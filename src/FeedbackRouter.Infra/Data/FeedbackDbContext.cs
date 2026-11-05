@@ -22,6 +22,7 @@ public class FeedbackDbContext : DbContext
     public DbSet<TriageProposal> TriageProposals => Set<TriageProposal>();
     public DbSet<TriageDecision> TriageDecisions => Set<TriageDecision>();
     public DbSet<WorkItemLink> WorkItemLinks => Set<WorkItemLink>();
+    public DbSet<LlmUsage> LlmUsage => Set<LlmUsage>();
 
     protected override void ConfigureConventions(ModelConfigurationBuilder builder)
     {
@@ -96,6 +97,12 @@ public class FeedbackDbContext : DbContext
             e.ToTable("WorkItemLinks");
             e.HasKey(x => x.FeedbackItemId);
             e.Property(x => x.AdoUrl).HasMaxLength(500);
+        });
+
+        model.Entity<LlmUsage>(e =>
+        {
+            e.ToTable("LlmUsage");
+            e.HasKey(x => x.Day);
         });
     }
 
