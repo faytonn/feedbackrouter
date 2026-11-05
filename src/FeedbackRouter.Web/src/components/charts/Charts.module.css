@@ -1,0 +1,67 @@
+.frame {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+
+.frame svg {
+  display: block;
+  overflow: visible;
+}
+
+.mark {
+  fill: var(--chart-mark);
+  transition: opacity var(--fade) linear;
+}
+
+.dimmed {
+  opacity: 0.45;
+}
+
+.grid {
+  stroke: var(--bg-row-selected);
+  stroke-width: 1;
+}
+
+.baseline {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.axisLabel {
+  fill: var(--text-secondary);
+  font-size: var(--text-xs);
+}
+
+.label {
+  fill: var(--text);
+  font-size: var(--text-sm);
+}
+
+.value {
+  fill: var(--text-secondary);
+  font-size: var(--text-xs);
+}
+
+.tooltip {
+  position: absolute;
+  z-index: 1;
+  padding: 2px 6px;
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-pane);
+  color: var(--text);
+  font-size: var(--text-xs);
+  white-space: nowrap;
+  pointer-events: none;
+  transform: translate(-50%, calc(-100% - 6px));
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
