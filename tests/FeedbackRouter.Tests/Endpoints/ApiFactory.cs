@@ -28,6 +28,9 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
         builder.UseSetting("Telemetry:ConsoleExporter", "false");
         builder.UseSetting("ConnectionStrings:FeedbackRouter", "unused");
 
+        // Migrations target SQL Server; the SQLite schema comes from EnsureCreated.
+        builder.UseSetting("Database:MigrateOnStartup", "false");
+
         builder.ConfigureServices(services =>
         {
             services.RemoveAll<DbContextOptions<FeedbackDbContext>>();

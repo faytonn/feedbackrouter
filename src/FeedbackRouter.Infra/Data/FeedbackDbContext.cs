@@ -1,6 +1,7 @@
 using FeedbackRouter.Core.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace FeedbackRouter.Infra.Data;
 
@@ -19,7 +20,15 @@ public sealed class FeedbackDbContext(DbContextOptions<FeedbackDbContext> option
         builder.Properties<Area>().HaveConversion<string>().HaveMaxLength(32);
         builder.Properties<FeedbackType>().HaveConversion<string>().HaveMaxLength(16);
         builder.Properties<DecisionAction>().HaveConversion<string>().HaveMaxLength(16);
+
+        // Every timestamp is UTC. datetime2 does not store DateTimeKind, so mark
+        // values as UTC on the way out or they serialize without a 'Z'.
+        builder.Properties<DateTime>().HaveConversion<UtcDateTimeConverter>();
     }
+
+    private sealed class UtcDateTimeConverter() : ValueConverter<DateTime, DateTime>(
+        v => v.Kind == DateTimeKind.Utc ? v : v.ToUniversalTime(),
+        v => DateTime.SpecifyKind(v, DateTimeKind.Utc));
 
     protected override void OnModelCreating(ModelBuilder model)
     {

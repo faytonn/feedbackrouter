@@ -13,7 +13,6 @@ using FeedbackRouter.Infra.Llm;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.AI;
-using OpenTelemetry.Logs;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
@@ -35,11 +34,11 @@ if (llm.IsConfigured)
     builder.Services.AddScoped<ITriageModel>(sp => new ChatClientTriageModel(sp.GetRequiredService<IChatClient>(), llm.ChatModel));
     builder.Services.AddScoped<ITextEmbedder>(sp => new EmbeddingGeneratorEmbedder(
         sp.GetRequiredService<IEmbeddingGenerator<string, Embedding<float>>>(), llm.EmbeddingModel));
+    builder.Services.AddScoped<TriagePipeline>();
 }
 
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSingleton(_ => TriagePrompt.Load(config["Triage:PromptVersion"] ?? TriagePrompt.CurrentVersion));
-builder.Services.AddScoped<TriagePipeline>();
 builder.Services.Configure<TriageOptions>(config.GetSection(TriageOptions.Section));
 builder.Services.AddSingleton<TriageSignal>();
 builder.Services.AddHostedService<TriageWorker>();
@@ -92,12 +91,8 @@ if (!string.IsNullOrWhiteSpace(config["APPLICATIONINSIGHTS_CONNECTION_STRING"]))
 }
 else if (config.GetValue("Telemetry:ConsoleExporter", true))
 {
+    // Logs already reach the console through the default logger; only spans need an exporter.
     otel.WithTracing(t => t.AddConsoleExporter());
-    builder.Logging.AddOpenTelemetry(l =>
-    {
-        l.IncludeScopes = true;
-        l.AddConsoleExporter();
-    });
 }
 
 var app = builder.Build();

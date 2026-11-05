@@ -65,6 +65,7 @@ public sealed class FeedbackEndpointTests : IAsyncLifetime
         var proposed = await _client.GetFromJsonAsync<List<QueueItemDto>>("/api/queue?status=Proposed", Json, Ct);
 
         Assert.Equal([dismissed, sev1Old, sev1New, sev3Old], all!.Select(i => i.Id));
+        Assert.All(all!, i => Assert.Equal(DateTimeKind.Utc, i.SubmittedAt.Kind));
         Assert.Equal([sev1Old, sev1New, sev3Old], proposed!.Select(i => i.Id));
     }
 
