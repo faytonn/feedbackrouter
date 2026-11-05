@@ -37,17 +37,12 @@ public sealed partial class AzureDevOpsWorkItemFiler(
         activity?.SetTag("feedback.id", request.FeedbackItemId);
         activity?.SetTag("ado.project", _options.Project);
         activity?.SetTag("ado.work_item_type", workItemType);
-        activity?.SetTag("ado.dry_run", _options.DryRun);
+        activity?.SetTag("ado.dry_run", _options.IsDryRun);
 
-        if (_options.DryRun)
+        if (_options.IsDryRun)
         {
             LogDryRun(logger, request.FeedbackItemId, url, patch.ToJsonString());
             return new FilingResult(null, null, DryRun: true, _options.Project);
-        }
-
-        if (string.IsNullOrWhiteSpace(_options.Pat))
-        {
-            throw new WorkItemFilingException("Azure DevOps PAT is not configured. Set AzureDevOps:Pat or turn on DryRun.");
         }
 
         for (var attempt = 0; ; attempt++)

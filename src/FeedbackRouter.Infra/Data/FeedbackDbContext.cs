@@ -5,8 +5,19 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace FeedbackRouter.Infra.Data;
 
-public sealed class FeedbackDbContext(DbContextOptions<FeedbackDbContext> options) : DbContext(options)
+public class FeedbackDbContext : DbContext
 {
+    public FeedbackDbContext(DbContextOptions<FeedbackDbContext> options)
+        : base(options)
+    {
+    }
+
+    /// <summary>For provider-specific subclasses, which keep their own migrations.</summary>
+    protected FeedbackDbContext(DbContextOptions options)
+        : base(options)
+    {
+    }
+
     public DbSet<FeedbackItem> FeedbackItems => Set<FeedbackItem>();
     public DbSet<TriageProposal> TriageProposals => Set<TriageProposal>();
     public DbSet<TriageDecision> TriageDecisions => Set<TriageDecision>();

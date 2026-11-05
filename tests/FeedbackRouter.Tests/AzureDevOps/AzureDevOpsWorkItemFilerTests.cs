@@ -25,7 +25,11 @@ public class AzureDevOpsWorkItemFilerTests
         """;
 
     private static (AzureDevOpsWorkItemFiler Filer, FakeHandler Handler, List<TimeSpan> Delays) Create(
-        bool dryRun = false, params Func<HttpResponseMessage>[] responses)
+        bool dryRun = false, params Func<HttpResponseMessage>[] responses) =>
+        Create(dryRun, "secret-pat", responses);
+
+    private static (AzureDevOpsWorkItemFiler Filer, FakeHandler Handler, List<TimeSpan> Delays) Create(
+        bool dryRun, string? pat, Func<HttpResponseMessage>[] responses)
     {
         var handler = new FakeHandler(responses);
         var delays = new List<TimeSpan>();
@@ -33,7 +37,7 @@ public class AzureDevOpsWorkItemFilerTests
         {
             Organization = "contoso",
             Project = "Feedback",
-            Pat = "secret-pat",
+            Pat = pat,
             DryRun = dryRun,
         });
         var filer = new AzureDevOpsWorkItemFiler(
@@ -161,6 +165,17 @@ public class AzureDevOpsWorkItemFilerTests
         Assert.True(result.DryRun);
         Assert.Null(result.WorkItemId);
         Assert.Equal("Feedback", result.Project);
+        Assert.Empty(handler.Requests);
+    }
+
+    [Fact]
+    public async Task Without_a_pat_dry_run_is_forced_even_when_turned_off()
+    {
+        var (filer, handler, _) = Create(dryRun: false, pat: null, []);
+
+        var result = await filer.FileAsync(Request, TestContext.Current.CancellationToken);
+
+        Assert.True(result.DryRun);
         Assert.Empty(handler.Requests);
     }
 

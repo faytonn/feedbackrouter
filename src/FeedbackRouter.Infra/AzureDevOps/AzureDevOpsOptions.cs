@@ -17,6 +17,12 @@ public sealed class AzureDevOpsOptions
     /// <summary>Log the request instead of sending it. On by default so the app runs without a PAT.</summary>
     public bool DryRun { get; set; } = true;
 
+    /// <summary>
+    /// Dry run is forced when no PAT is set, so a deployment without a token
+    /// can never try to file, whatever DryRun says.
+    /// </summary>
+    public bool IsDryRun => DryRun || string.IsNullOrWhiteSpace(Pat);
+
     /// <summary>Work item type per feedback type. The defaults match the Agile process.</summary>
     public Dictionary<FeedbackType, string> WorkItemTypes { get; set; } = new()
     {

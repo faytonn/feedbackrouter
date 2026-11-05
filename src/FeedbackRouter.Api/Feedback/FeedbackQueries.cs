@@ -109,7 +109,7 @@ public sealed class FeedbackQueries(FeedbackDbContext db, IOptions<AzureDevOpsOp
                     d.FinalTitle, d.FinalSummary, d.Notes)
                 : null,
             item.WorkItemLink is { } l ? new WorkItemDto(l.AdoWorkItemId, l.AdoUrl, l.FiledAt, l.DryRun) : null,
-            new FilingTargetDto(options.Organization, options.Project, options.DryRun));
+            new FilingTargetDto(options.Organization, options.Project, options.IsDryRun));
     }
 
     private async Task<IReadOnlyList<DuplicateDto>> DuplicatesAsync(
