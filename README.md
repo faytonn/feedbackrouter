@@ -75,40 +75,13 @@ Set these as environment variables (double underscore for nesting) or in a `.env
 | `AzureDevOps__Pat` | empty | PAT with Work Items read and write |
 | `AzureDevOps__DryRun` | `true` | Log the work item instead of creating it. Always on when no PAT is set |
 | `Database__Provider` | `SqlServer` | `SqlServer` or `Postgres` |
-| `Demo__Enabled` | `false` | Public demo mode, see the Railway section |
+| `Demo__Enabled` | `false` | Public demo: seeds an empty database, resets it nightly, shows a banner, never files |
 | `Auth__RequireSignIn` | `true` (`false` in Development) | Require a signed-in reviewer, see below |
 | `Reviewer__Name` | `reviewer` | Name recorded on decisions when sign-in is off |
 | `RateLimit__SubmitPerMinute` | `10` | Submissions per IP per minute |
 | `APPLICATIONINSIGHTS_CONNECTION_STRING` | empty | Send OpenTelemetry to Azure Monitor; otherwise traces go to the console |
 
 **Sign-in.** With `Auth__RequireSignIn=true`, reviewer endpoints return 401 unless the request carries `X-MS-CLIENT-PRINCIPAL-NAME`. Azure Container Apps built-in sign-in sets that header and strips it from client requests. Turn this on only behind that sign-in; anywhere else the header could be forged. Submitting feedback never needs sign-in.
-
-## Deploy the demo to Railway
-
-The public demo runs on Railway with PostgreSQL instead of SQL Server; the provider is chosen by `Database__Provider`. In demo mode the app seeds an empty database, resets it to the seed every night at 03:00 UTC, shows a banner, and never files: dry run is forced, and no Azure DevOps token is set.
-
-1. Push this repo to GitHub.
-2. In Railway: **New project**, then **Deploy from GitHub repo**, and pick the repo. `railway.json` tells Railway to build the `Dockerfile` and check `/healthz`.
-3. In the same project: **New**, then **Database**, then **PostgreSQL**.
-4. On the app service, open **Variables** and add:
-
-   ```
-   ASPNETCORE_ENVIRONMENT=Production
-   PORT=8080
-   Database__Provider=Postgres
-   ConnectionStrings__FeedbackRouter=Host=${{Postgres.PGHOST}};Port=${{Postgres.PGPORT}};Database=${{Postgres.PGDATABASE}};Username=${{Postgres.PGUSER}};Password=${{Postgres.PGPASSWORD}}
-   Demo__Enabled=true
-   Auth__RequireSignIn=false
-   AzureDevOps__Organization=demo
-   AzureDevOps__Project=FeedbackRouter
-   ```
-
-   Do not add `AzureDevOps__Pat`. Without it, filing is always a dry run.
-5. Under **Settings**, then **Networking**, click **Generate domain**. The first deploy applies migrations and imports the 40 seed items.
-
-Anyone with the URL can act as a reviewer. The data resets nightly, nothing reaches Azure DevOps, and submissions stay rate limited per IP.
-
-**Cost:** the API and Postgres use about 0.3 GB of RAM together, which is about $3 a month at Railway's rate of $10 per GB. That fits inside the $5 of usage included in the Hobby plan, so the demo costs about $5 a month. The trial's one-time $5 credit covers roughly the first month. The free plan's 0.5 GB per service and small credit are too tight for an always-on .NET API. Check [railway.com/pricing](https://railway.com/pricing) for current rates.
 
 ## Using the queue
 
